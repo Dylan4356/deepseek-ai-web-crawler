@@ -1,26 +1,44 @@
 import csv
 
-from models.venue import Venue
+from models.fellowship import Fellowship
 
+import csv
 
-def is_duplicate_venue(venue_name: str, seen_names: set) -> bool:
-    return venue_name in seen_names
+from typing import List, Set, Dict
 
+def is_complete_fellowship(fellowship: Dict, required_keys: List[str]) -> bool:
+    """
+    Check if the fellowship dictionary contains all required keys and non-empty values.
+    """
+    for key in required_keys:
+        if key not in fellowship or not fellowship[key]:
+            return False
+    return True
 
-def is_complete_venue(venue: dict, required_keys: list) -> bool:
-    return all(key in venue for key in required_keys)
+def is_duplicate_fellowship(program_name: str, seen_programs: Set[str]) -> bool:
+    """
+    Check if this fellowship program has already been seen.
+    """
+    return program_name in seen_programs
 
-
-def save_venues_to_csv(venues: list, filename: str):
-    if not venues:
-        print("No venues to save.")
+def save_fellowships_to_csv(fellowships, path="complete_fellowships.csv"):
+    if not fellowships:
+        print("No fellowships to save.")
         return
 
-    # Use field names from the Venue model
-    fieldnames = Venue.model_fields.keys()
+    # Use the keys from the first item
+    keys = fellowships[0].keys() if isinstance(fellowships[0], dict) else fellowships[0].__dict__.keys()
 
-    with open(filename, mode="w", newline="", encoding="utf-8") as file:
-        writer = csv.DictWriter(file, fieldnames=fieldnames)
+    with open(path, "w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=keys)
         writer.writeheader()
-        writer.writerows(venues)
-    print(f"Saved {len(venues)} venues to '{filename}'.")
+        for fship in fellowships:
+            writer.writerow(fship if isinstance(fship, dict) else fship.__dict__)
+
+def load_fellowships(path="fellowships.csv") -> list[Fellowship]:
+    """
+    Load fellowship data from a CSV file.
+    """
+    with open(path, newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        return [Fellowship(**row) for row in reader]

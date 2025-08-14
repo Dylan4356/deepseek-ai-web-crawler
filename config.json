@@ -1,0 +1,8 @@
+[
+  {
+    "name": "UAB",
+    "url": "https://www.uab.edu/med/.../meet-our-people",
+    "selector": "#content",
+    "required_keys": ["program_name", "name", "PGY", "medical_school"]
+  }
+]
